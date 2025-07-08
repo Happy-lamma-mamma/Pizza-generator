@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <title>Emoji Pizza Generator</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #fffbe7;
+      margin-top: 50px;
+      transition: filter 3s ease; /* pro hladkou změnu grayscale */
+    }
+    h1 {
+      font-size: 3em;
+    }
+    #pizza {
+      width: 300px;
+      height: 300px;
+      margin: 30px auto;
+      background: #f4d35e;
+      border-radius: 50%;
+      position: relative;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+    .topping {
+      position: absolute;
+      font-size: 4em;
+      pointer-events: none;
+      user-select: none;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1.2em;
+      background-color: tomato;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    button:hover {
+      font-size: 1.5em;
+    }
+
+    /* menší, průhledný overlay */
+    #gameOverOverlay {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      border-radius: 15px;
+      padding: 30px 50px;
+      z-index: 1000;
+      font-size: 2em;
+      user-select: none;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(0,0,0,0.9);
+      max-width: 80vw;
+    }
+    #gameOverOverlay button {
+      font-size: 1em;
+      margin-top: 20px;
+      padding: 10px 30px;
+      border-radius: 10px;
+      border: none;
+      background: tomato;
+      color: white;
+      cursor: pointer;
+      filter: none !important;
+    }
+
+    #gameOverOverlay button:hover {
+      background: red;
+      filter: none !important;
+    }
+
+    #approvalBadge {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 200px;
+      display: none;
+      z-index: 9999;
+      text-align: center;
+      color: white;
+      font-weight: bold;
+      font-family: sans-serif;
+      text-shadow: 1px 1px 3px black;
+    }
+
+    #approvalBadge img {
+      width: 100%;
+    }
+
+
+  </style>
+</head>
+<body>
+
+<h1>🍕 Tvoje emojizza!</h1>
+<h2>Pozor na houby!!</h2>
+<div id="pizza"></div>
+<button onclick="generateEmojiPizza()">Vygeneruj pizzu</button>
+
+<!-- menší overlay -->
+<div id="gameOverOverlay">
+  Ups, umřel jsi! 🍄☠️<br />
+  <button onclick="restartGame()">Hrát znovu</button>
+</div>
+
+<div id="approvalBadge">
+  <img src="images/Seznam_approves.jpg" alt="Seznam approves!">
+  <div id="approvalText">🍖 Seznam approves! 🍖</div>
+</div>
+
+<script>
+
+  const toppings = {
+  '🧀': 5,
+  '🍍': 4,
+  '🍖': 4,
+  '🍬': 3,
+  '🥦': 3,
+  '🍌': 2,
+  '🍫': 2,
+  '🫒': 2,
+  '🥚': 2,
+  '🍄': 1 // houba má nejmenší šanci
+};
+
+function generateEmojiPizza() {
+    const approval = document.getElementById("approvalBadge");
+    const pizza = document.getElementById("pizza");
+    const overlay = document.getElementById("gameOverOverlay");
+
+    overlay.style.display = "none";
+    approval.style.display = "none"; // schováme na začátku
+
+
+    // postupně odebereme grayscale filtr (přehodíme na 0)
+    document.body.style.filter = "grayscale(0)";
+
+    pizza.innerHTML = '';
+
+    const count = Math.floor(Math.random() * 10) + 5;
+    let hasPoison = false;
+    let hasMeat = false;
+
+    for (let i = 0; i < count; i++) {
+      const emoji = getRandomTopping();
+      if (emoji === '🍄') hasPoison = true;
+      if (emoji === '🍖') hasMeat = true;
+
+      const top = Math.random() * 80 + 10;
+      const left = Math.random() * 80 + 10;
+
+      const topping = document.createElement("div");
+      topping.className = "topping";
+      topping.style.top = `${top}%`;
+      topping.style.left = `${left}%`;
+      topping.innerText = emoji;
+
+      pizza.appendChild(topping);
+    }
+
+    function getRandomTopping() {
+      const items = Object.entries(toppings);
+      const weighted = [];
+
+      for (const [emoji, weight] of items) {
+        for (let i = 0; i < weight; i++) {
+          weighted.push(emoji);
+        }
+      }
+
+      const randomIndex = Math.floor(Math.random() * weighted.length);
+      return weighted[randomIndex];
+    }
+
+  if (hasMeat && !hasPoison) {
+    approval.style.display = "block";
+  }
+
+  if (hasPoison) {
+      // zobraz overlay a postupně přidáme grayscale přes 3 sekundy
+      overlay.style.display = "block";
+
+      setTimeout(() => {
+        document.body.style.filter = "grayscale(1)";
+      }, 100); // maličké zpoždění, aby animace naskočila
+    }
+  }
+
+  function restartGame() {
+    const overlay = document.getElementById("gameOverOverlay");
+    overlay.style.display = "none";
+    document.body.style.filter = "grayscale(0)";
+    generateEmojiPizza();
+  }
+
+  generateEmojiPizza();
+</script>
+
+</body>
+</html>
